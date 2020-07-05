@@ -18,5 +18,8 @@
   },
   "dependencies": {
     "path-to-regexp": "^6.1.0"
+  },
+  "prettier": {
+    "printWidth": 120
   }
 }

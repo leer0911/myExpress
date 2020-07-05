@@ -1,7 +1,9 @@
 import http, { IncomingMessage, ServerResponse, METHODS } from "http";
 import Router from "./router";
-import { Method, Handle } from "./types";
-
+import { Method } from "./types";
+import request from "./request";
+import response from "./response";
+import middleware from "./middleware";
 interface Application {
   get: Method;
   post: Method;
@@ -42,6 +44,34 @@ class Application {
     this.router.use(path, fn);
 
     return this;
+  }
+  handle(req: IncomingMessage, res: ServerResponse) {
+    Object.setPrototypeOf(req, request);
+    Object.setPrototypeOf(res, response);
+    const done = (param?: string) => {
+      res.writeHead(404, {
+        "Content-Type": "text/plain",
+      });
+
+      if (param) {
+        res.end("404: " + param);
+      } else {
+        const msg = "Cannot " + req.method + " " + req.url;
+        res.end(msg);
+      }
+    };
+    if (this.router) {
+      this.router.handle(req, res, done);
+    } else {
+      done();
+    }
+  }
+  lazyRouter() {
+    if (!this.router) {
+      this.router = new Router();
+
+      this.router.use(middleware.init());
+    }
   }
 }
 
