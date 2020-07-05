@@ -1,6 +1,6 @@
 import http, { IncomingMessage, ServerResponse, METHODS } from "http";
 import Router from "./router";
-import { Method } from "./types";
+import { Method, Handle } from "./types";
 
 interface Application {
   get: Method;
@@ -30,7 +30,19 @@ class Application {
     });
     return server.listen(...rest);
   }
-  handle() {}
+  use(...args: any[]) {
+    let [fn] = args;
+    let path = "/";
+
+    if (typeof fn !== "function") {
+      path = fn;
+      fn = arguments[1];
+    }
+
+    this.router.use(path, fn);
+
+    return this;
+  }
 }
 
 METHODS.forEach((_method) => {

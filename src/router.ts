@@ -40,6 +40,22 @@ export default class Router {
     this.stack.push(layer);
     return route;
   }
+  use(...args: any[]) {
+    let [fn] = args;
+    let path = "/";
+
+    if (typeof fn !== "function") {
+      path = fn;
+      fn = arguments[1];
+    }
+
+    var layer = new Layer(path, fn);
+    layer.route = null;
+
+    this.stack.push(layer);
+
+    return this;
+  }
 }
 
 METHODS.forEach((_method) => {

@@ -5,3 +5,5 @@ export default function express() {
 
   return app;
 }
+
+export { default as Router } from "./router";
