@@ -19,9 +19,11 @@ export default class Layer {
     }
     return false;
   }
-  handleRequest(req: IncomingMessage, res: ServerResponse) {
-    if (this.handle) {
-      this.handle(req, res);
+  handleRequest(req: IncomingMessage, res: ServerResponse, next: (...args: any[]) => void) {
+    try {
+      this.handle(req, res, next);
+    } catch (error) {
+      next(error);
     }
   }
 }

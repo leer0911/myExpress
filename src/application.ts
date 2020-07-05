@@ -15,13 +15,24 @@ class Application {
   router = new Router();
   constructor() {}
   listen(...rest: any) {
-    const server = http.createServer(
-      (req: IncomingMessage, res: ServerResponse) => {
-        this.router.handle(req, res);
-      }
-    );
+    const server = http.createServer((req: IncomingMessage, res: ServerResponse) => {
+      const done = (param?: string) => {
+        res.writeHead(404, {
+          "Content-Type": "text/plain",
+        });
+
+        if (param) {
+          res.end("404: " + param);
+        } else {
+          const msg = "Cannot " + req.method + " " + req.url;
+          res.end(msg);
+        }
+      };
+      this.router.handle(req, res, done);
+    });
     return server.listen(...rest);
   }
+  handle() {}
 }
 
 METHODS.forEach((_method) => {

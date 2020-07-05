@@ -2,11 +2,11 @@ import express from "../src";
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.end("Hello Express Get");
+app.get("/", (req, res, next) => {
+  next();
 });
 
-app.post("/", (req, res) => {
+app.get("/", (req, res) => {
   res.end("Hello Express POST");
 });
 

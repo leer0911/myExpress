@@ -6,31 +6,36 @@ import Route from "./route";
 export default class Router {
   stack: Layer[];
   constructor() {
-    this.stack = [
-      new Layer("*", (req, res) => {
-        res.writeHead(200, {
-          "Content-Type": "text/plain",
-        });
-        res.end("404");
-      }),
-    ];
+    this.stack = [];
   }
-  handle(req: IncomingMessage, res: ServerResponse) {
-    for (let i = 1, len = this.stack.length; i < len; i++) {
-      if (
-        this.stack[i].match(req.url || "") &&
-        this.stack[i]?.route?.handleMethod(req.method)
-      ) {
-        return this.stack[i].handleRequest(req, res);
+  handle(req: IncomingMessage, res: ServerResponse, done: any) {
+    const { method } = req;
+    const { stack } = this;
+    let idx = 0;
+
+    function next(param?: string | Error): void {
+      const layerParam = param === "route" ? undefined : param;
+      if (layerParam === "router") {
+        return done(null);
+      }
+
+      if (idx >= stack.length || layerParam) {
+        return done(layerParam);
+      }
+
+      const layer = stack[idx++];
+
+      if (layer.match(req.url || "") && layer?.route?.handleMethod(req.method)) {
+        return layer.handleRequest(req, res, next);
+      } else {
+        next(layerParam);
       }
     }
-    return this.stack[0].handleRequest(req, res);
+    next();
   }
   route(path: string) {
     const route = new Route(path);
-    const layer = new Layer(path, (req, res) => {
-      route.dispatch(req, res);
-    });
+    const layer = new Layer(path, route.dispatch.bind(route));
     layer.route = route;
     this.stack.push(layer);
     return route;
