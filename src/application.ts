@@ -1,15 +1,20 @@
 import http, { IncomingMessage, ServerResponse } from "http";
+import Router from "./router";
+import { Handle } from "./types";
 
 class Application {
+  router = new Router();
   constructor() {}
   listen(...rest: any) {
     const server = http.createServer(
       (req: IncomingMessage, res: ServerResponse) => {
-        console.log("req", req);
-        console.log("res", res);
+        this.router.handle(req, res);
       }
     );
     return server.listen(...rest);
+  }
+  get(path: string, handle: Handle) {
+    return this.router.get(path, handle);
   }
 }
 
