@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "TS File",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceRoot}/node_modules/.bin/ts-node",
+      "args": [
+        "${workspaceRoot}/example/index.ts" // 入口文件
+      ],
+      "cwd": "${workspaceRoot}"
+    }
+  ]
+}
