@@ -1,34 +1,42 @@
-import { RouterStack, Handle } from "./types";
+import { Handle } from "./types";
 import { IncomingMessage, ServerResponse } from "http";
+import Layer from "./layer";
+import Route from "./route";
 
 export default class Router {
-  stack: RouterStack[];
+  stack: Layer[];
   constructor() {
     this.stack = [
-      {
-        path: "*",
-        method: "*",
-        handle: function (req, res) {
-          res.writeHead(200, {
-            "Content-Type": "text/plain",
-          });
-          res.end("404");
-        },
-      },
+      new Layer("*", (req, res) => {
+        res.writeHead(200, {
+          "Content-Type": "text/plain",
+        });
+        res.end("404");
+      }),
     ];
   }
   get(path: string, handle: Handle) {
-    this.stack.push({ path, method: "GET", handle });
+    this.route(path).get(handle);
+    return this;
   }
   handle(req: IncomingMessage, res: ServerResponse) {
-    for (var i = 1, len = this.stack.length; i < len; i++) {
+    for (let i = 1, len = this.stack.length; i < len; i++) {
       if (
-        (req.url === this.stack[i].path || this.stack[i].path === "*") &&
-        (req.method === this.stack[i].method || this.stack[i].method === "*")
+        this.stack[i].match(req.url || "") &&
+        this.stack[i]?.route?.handleMethod(req.method)
       ) {
-        return this.stack[i].handle && this.stack[i].handle(req, res);
+        return this.stack[i].handleRequest(req, res);
       }
     }
-    return this.stack[0].handle && this.stack[0].handle(req, res);
+    return this.stack[0].handleRequest(req, res);
+  }
+  route(path: string) {
+    const route = new Route(path);
+    const layer = new Layer(path, (req, res) => {
+      route.dispatch(req, res);
+    });
+    layer.route = route;
+    this.stack.push(layer);
+    return route;
   }
 }
