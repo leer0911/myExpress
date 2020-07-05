@@ -1,6 +1,15 @@
-import http, { IncomingMessage, ServerResponse } from "http";
+import http, { IncomingMessage, ServerResponse, METHODS } from "http";
 import Router from "./router";
-import { Handle } from "./types";
+import { Method } from "./types";
+
+type methodKeys = keyof typeof METHODS;
+
+interface Application {
+  get: Method;
+  post: Method;
+  put: Method;
+  delete: Method;
+}
 
 class Application {
   router = new Router();
@@ -13,9 +22,14 @@ class Application {
     );
     return server.listen(...rest);
   }
-  get(path: string, handle: Handle) {
-    return this.router.get(path, handle);
-  }
 }
+
+METHODS.forEach((_method) => {
+  const method = _method.toLowerCase();
+  (Application as any).prototype[method] = function (...args: any) {
+    this.router[method].apply(this.router, args);
+    return this;
+  };
+});
 
 export default Application;

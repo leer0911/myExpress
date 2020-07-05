@@ -1,6 +1,6 @@
 import Layer from "./layer";
 import { Handle } from "./types";
-import { ServerResponse, IncomingMessage } from "http";
+import { ServerResponse, IncomingMessage, METHODS } from "http";
 
 export default class Route {
   path: string;
@@ -14,13 +14,6 @@ export default class Route {
   handleMethod(method = "") {
     return Boolean(this.methods[method.toLowerCase()]);
   }
-  get(handle: Handle) {
-    const layer = new Layer("/", handle);
-    layer.method = "get";
-    this.methods.get = true;
-    this.stack.push(layer);
-    return this;
-  }
   dispatch(req: IncomingMessage, res: ServerResponse) {
     const method = req?.method?.toLowerCase();
     for (let i = 0, len = this.stack.length; i < len; i++) {
@@ -30,3 +23,14 @@ export default class Route {
     }
   }
 }
+
+METHODS.forEach((_method) => {
+  const method = _method.toLowerCase();
+  (Route as any).prototype[method] = function (handle: Handle) {
+    let layer = new Layer("/", handle);
+    layer.method = method;
+    this.methods[method] = true;
+    this.stack.push(layer);
+    return this;
+  };
+});

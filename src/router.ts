@@ -1,5 +1,5 @@
 import { Handle } from "./types";
-import { IncomingMessage, ServerResponse } from "http";
+import { IncomingMessage, ServerResponse, METHODS } from "http";
 import Layer from "./layer";
 import Route from "./route";
 
@@ -14,10 +14,6 @@ export default class Router {
         res.end("404");
       }),
     ];
-  }
-  get(path: string, handle: Handle) {
-    this.route(path).get(handle);
-    return this;
   }
   handle(req: IncomingMessage, res: ServerResponse) {
     for (let i = 1, len = this.stack.length; i < len; i++) {
@@ -40,3 +36,12 @@ export default class Router {
     return route;
   }
 }
+
+METHODS.forEach((_method) => {
+  const method = _method.toLowerCase();
+  (Router as any).prototype[method] = function (path: string, handle: Handle) {
+    const route = this.route(path);
+    route[method].call(route, handle);
+    return this;
+  };
+});
