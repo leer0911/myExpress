@@ -6,6 +6,10 @@ app.get("/", (req, res, next) => {
   next();
 });
 
+app.get("/", (req, res, next) => {
+  next(new Error("test error"));
+});
+
 app.get("/", (req, res) => {
   res.end("Hello Express POST");
 });

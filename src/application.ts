@@ -2,8 +2,6 @@ import http, { IncomingMessage, ServerResponse, METHODS } from "http";
 import Router from "./router";
 import { Method } from "./types";
 
-type methodKeys = keyof typeof METHODS;
-
 interface Application {
   get: Method;
   post: Method;

@@ -35,7 +35,7 @@ export default class Router {
   }
   route(path: string) {
     const route = new Route(path);
-    const layer = new Layer(path, route.dispatch.bind(route));
+    const layer = new Layer(path, route.dispatch.bind(route) as Handle);
     layer.route = route;
     this.stack.push(layer);
     return route;

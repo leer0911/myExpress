@@ -37,7 +37,7 @@ export default class Route {
       }
 
       if (param) {
-        return done(param);
+        layer.handleError(param, req, res, next);
       } else {
         layer.handleRequest(req, res, next);
       }

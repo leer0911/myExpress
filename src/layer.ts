@@ -26,4 +26,11 @@ export default class Layer {
       next(error);
     }
   }
+  handleError(error: any, req: IncomingMessage, res: ServerResponse, next: (...args: any[]) => void) {
+    try {
+      this.handle(error, req, res, next);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
